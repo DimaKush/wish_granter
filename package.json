@@ -1,0 +1,31 @@
+{
+  "name": "wish_granter",
+  "version": "1.0.0",
+  "description": "Simple Telegram bot with AI chat capabilities",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "ai",
+    "chat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.1",
+    "dotenv": "^16.3.1",
+    "telegraf": "^4.12.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  }
+}
