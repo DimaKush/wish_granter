@@ -4,6 +4,7 @@ import * as path from 'path';
 import { logger } from './config';
 import { getSingleAdmin } from '../db/repository';
 import { bot } from '../index';
+import { callAnthropicAPI, AnthropicMessage } from '../services/anthropic';
 
 const ENCRYPTION_KEY = crypto.randomBytes(32).toString('base64');
 const ENCRYPTION_ALGORITHM = 'aes-256-cbc';
@@ -168,7 +169,7 @@ export async function sendMessageToAnthropic(
       timestamp: Date.now()
     });
     
-    const formattedMessages = messages.map(msg => ({
+    const formattedMessages: AnthropicMessage[] = messages.map(msg => ({
       role: msg.role,
       content: msg.content
     }));
@@ -176,19 +177,7 @@ export async function sendMessageToAnthropic(
     // Send thinking message
     thinkingMessage = await bot.telegram.sendMessage(userId, "🤔 Thinking...");
 
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY || '',
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20240620',
-          max_tokens: 1000,
-          messages: formattedMessages,
-          system: `You are WishGranter. Key guidelines:
+    const systemPrompt = `You are WishGranter. Key guidelines:
 
 1. Always introduce yourself as WishGranter
 2. Your main task is to identify and understand users' ultimate wishes
@@ -228,22 +217,10 @@ You: *send admin notification first, then respond to user*
 - What does being 'rich' mean to you specifically?
 - Have you taken any steps towards financial growth already?
 - Do you have a plan for wealth building?
-- What would be your next immediate step?"`
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`API request failed with status ${response.status}: ${errorData}`);
-      }
-      
-      interface AnthropicResponse {
-        content: Array<{type: string, text: string}>;
-        id: string;
-        model: string;
-      }
-      
-      const data = await response.json() as AnthropicResponse;
+- What would be your next immediate step?"`;
+
+    try {
+      const data = await callAnthropicAPI(formattedMessages, systemPrompt);
       const assistantMessage = data.content[0].text;
       
       // Separate admin notification from user response
