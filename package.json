@@ -1,7 +1,7 @@
 {
   "name": "wish_granter",
   "version": "1.0.0",
-  "description": "Simple Telegram bot with AI chat capabilities",
+  "description": "AI-powered Telegram bot that helps users discover and formulate their true wishes through conversational dialogue",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -12,7 +12,11 @@
     "telegram",
     "bot",
     "ai",
-    "chat"
+    "chat",
+    "anthropic",
+    "claude",
+    "wish-granter",
+    "goal-setting"
   ],
   "author": "",
   "license": "MIT",

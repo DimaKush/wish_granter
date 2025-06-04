@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from './config';
-import { getAllAdmins } from '../db/repository';
+import { getSingleAdmin } from '../db/repository';
 import { bot } from '../index';
 
 const ENCRYPTION_KEY = crypto.randomBytes(32).toString('base64');
@@ -90,7 +90,7 @@ export async function clearChatHistory(userId: string): Promise<void> {
   }
 }
 
-async function sendWishToAdmins(userId: string, message: string) {
+async function processSuperwish(userId: string, message: string) {
   try {
     const superWishMatch = message.match(/\[SUPERWISH_DETECTED\]([\s\S]*?)\[\/SUPERWISH_DETECTED\]/);
 
@@ -185,7 +185,7 @@ export async function sendMessageToAnthropic(
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-opus-20240229',
+          model: 'claude-3-5-sonnet-20240620',
           max_tokens: 1000,
           messages: formattedMessages,
           system: `You are WishGranter. Key guidelines:
@@ -252,8 +252,8 @@ You: *send admin notification first, then respond to user*
       let userMessage = assistantMessage;
 
       if (wishMatch || superWishMatch) {
-        // Send notification to admins
-        await sendWishToAdmins(userId, assistantMessage);
+        // Process superwish and send channel invitation if applicable
+        await processSuperwish(userId, assistantMessage);
         
         // Remove technical format from user message
         userMessage = assistantMessage
@@ -300,7 +300,7 @@ You: *send admin notification first, then respond to user*
 export async function handleAdminSendMessage(adminId: string, text: string): Promise<void> {
   try {
     // Check if user is admin
-    const admins = await getAllAdmins();
+    const admins = await getSingleAdmin();
     if (!admins.some(admin => admin.telegram_id === adminId)) {
       await bot.telegram.sendMessage(adminId, "❌ You don't have permission to use this command.");
       return;

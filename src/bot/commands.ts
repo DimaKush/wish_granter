@@ -2,7 +2,6 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../types';
 import { logger } from '../utils/config';
 import { handleAdminSendMessage, clearChatHistory } from '../utils/chat';
-import { getAllAdmins } from '../db/repository';
 
 export function setupCommands(bot: Telegraf<Context>) {
   // Start command
@@ -127,27 +126,10 @@ How it works:
     }
   });
 
-  // Debug admin status command
-  // bot.command('amiadmin', async (ctx: Context) => {
-  //   try {
-  //     const userId = ctx.from?.id?.toString();
-  //     const admins = await getAllAdmins();
-  //     const isAdmin = admins.some(admin => admin.telegram_id === userId);
-      
-  //     await ctx.reply(
-  //       `Your ID: ${userId}\n` +
-  //       `Admin status: ${isAdmin ? '✅ Yes' : '❌ No'}\n` +
-  //       `Registered admins: ${admins.map(a => a.telegram_id).join(', ')}`
-  //     );
-  //   } catch (error) {
-  //     logger.error('Error in /amiadmin command:', error);
-  //     await ctx.reply('Error checking admin status.');
-  //   }
-  // });
 
   // Who command to check runtime connections
   bot.command('who', async (ctx) => {
-    const activeConnections = 0; // Always 0 since we don't maintain connections
+    const activeConnections = 0;
     const processConnected = process.connected;
     
     const statusMessage = `🔒 Статус безопасности:

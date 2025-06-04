@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Load environment variables
 if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | xargs)
+    set -a
+    source .env
+    set +a
 else
     echo "Error: .env file not found"
     exit 1
@@ -13,7 +14,17 @@ if [ -z "$DROPLET_IP" ]; then
     exit 1
 fi
 
-SSH_KEY="$HOME/.ssh/id_rsa"
+if [ -z "$SSH_KEY_PATH" ]; then
+    echo "Error: SSH_KEY_PATH not set in .env"
+    exit 1
+fi
+
+if [ -z "$BOT_TOKEN" ] || [ -z "$ANTHROPIC_API_KEY" ] || [ -z "$ADMIN_TELEGRAM_ID" ]; then
+    echo "Error: Required bot variables not set in .env"
+    exit 1
+fi
+
+SSH_KEY="$SSH_KEY_PATH"
 REMOTE_DIR="/root/telegram_bot"
 USER="root"
 
@@ -29,9 +40,10 @@ rsync -avz --progress \
     --exclude 'dist' \
     --exclude '.git' \
     --exclude 'logs' \
+    --exclude 'data' \
     ./ $USER@$DROPLET_IP:$REMOTE_DIR/
 
 # Deploy
 ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose down && docker compose up -d --build"
 
-echo "✅ Deployment complete!" 
+echo "✅ Deployment complete!"

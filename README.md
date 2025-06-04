@@ -1,8 +1,8 @@
-# Simple Telegram AI Bot
+# Wish Granter - AI Telegram Bot
 
-A simple Telegram bot with AI chat capabilities powered by Anthropic Claude.
+An AI-powered Telegram bot that helps users discover and formulate their true wishes through conversational dialogue with Anthropic Claude.
 
-## Features
+## Core Features
 
 - AI-powered conversations using Anthropic Claude
 - Session-based chat history
@@ -12,22 +12,12 @@ A simple Telegram bot with AI chat capabilities powered by Anthropic Claude.
 
 ## Security & Privacy
 
-### Message Security
-- Messages are secured using Telegram's built-in MTProto protocol
-- Chat history is stored locally in session memory
-- Basic logging of technical events (no message content)
-- `/who` command available to check connection status
-
-### Access Control
-- Messages are processed through Claude AI
-- Basic admin commands are logged
-- Chat history is session-based per user
-
-### Data Storage
-- Chat history stored temporarily in session memory
-- Technical logs stored in `/app/logs`
-- Local storage only, no cloud services used
-- No persistent user data beyond session
+### Security & Privacy
+- **AES-256-CBC encryption** for all stored conversations
+- **Session-based storage** - history cleared on bot restart
+- **Local-only data** - no cloud services used
+- **Connection monitoring** via `/who` command
+- Users notified on memory reboot
 
 ## Commands
 
@@ -36,6 +26,8 @@ A simple Telegram bot with AI chat capabilities powered by Anthropic Claude.
 - `/new_chat` - Start a fresh conversation (clears history)
 - `/help` - Show help information
 - `/who` - Check connection status
+- `/myid` - Get your Telegram ID
+- `/send` - (Admin only) Send message to user
 
 You can also just send any text message to start chatting directly!
 
@@ -43,7 +35,8 @@ You can also just send any text message to start chatting directly!
 
 1. **Clone and install dependencies:**
 ```bash
-cd simple_telegram_bot
+git clone <repository-url>
+cd wish_granter
 npm install
 ```
 
@@ -80,6 +73,8 @@ src/
 ├── utils/
 │   ├── config.ts     # Configuration and logging
 │   └── chat.ts       # Anthropic AI integration
+├── db/
+│   └── repository.ts # Admin management
 └── types/
     └── index.ts      # TypeScript type definitions
 ```

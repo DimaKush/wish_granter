@@ -4,18 +4,15 @@ interface Admin {
   is_active: boolean;
 }
 
-export async function getAllAdmins(): Promise<Admin[]> {
-  // Читаем переменную окружения КАЖДЫЙ РАЗ при вызове функции!
+export async function getSingleAdmin(): Promise<Admin[]> {
   const adminId = process.env.ADMIN_TELEGRAM_ID;
   
-  console.log('🔍 Reading ADMIN_TELEGRAM_ID from env:', adminId);
-  
-  if (!adminId || adminId === '123456789') {
-    console.log('❌ ADMIN_TELEGRAM_ID not properly set in environment');
+  if (!adminId) {
+    console.log('❌ ADMIN_TELEGRAM_ID not set in environment');
     return [];
   }
 
-  console.log('✅ Found admin ID:', adminId);
+  console.log('✅ Admin configuration loaded');
 
   return [
     {
@@ -25,13 +22,3 @@ export async function getAllAdmins(): Promise<Admin[]> {
     }
   ];
 }
-
-export async function addAdmin(telegramId: string, username?: string): Promise<void> {
-  // В реальной реализации тут была бы база данных
-  console.log(`Would add admin: ${telegramId}`);
-}
-
-export async function removeAdmin(telegramId: string): Promise<void> {
-  // В реальной реализации тут была бы база данных
-  console.log(`Would remove admin: ${telegramId}`);
-} 
