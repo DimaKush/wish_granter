@@ -1,5 +1,5 @@
 import { setupCommands } from '../../src/bot/commands';
-import { handleAdminSendMessage, clearChatHistory } from '../../src/utils/chat';
+import { clearChatHistory } from '../../src/utils/chat';
 
 // Mock dependencies
 jest.mock('../../src/utils/chat');
@@ -10,7 +10,6 @@ jest.mock('../../src/utils/config', () => ({
   }
 }));
 
-const mockHandleAdminSendMessage = handleAdminSendMessage as jest.MockedFunction<typeof handleAdminSendMessage>;
 const mockClearChatHistory = clearChatHistory as jest.MockedFunction<typeof clearChatHistory>;
 
 describe('Bot Commands', () => {
@@ -36,11 +35,9 @@ describe('Bot Commands', () => {
     setupCommands(mockBot);
     
     expect(mockBot.command).toHaveBeenCalledWith('start', expect.any(Function));
-    expect(mockBot.command).toHaveBeenCalledWith('chat', expect.any(Function));
-    expect(mockBot.command).toHaveBeenCalledWith('new_chat', expect.any(Function));
+    expect(mockBot.command).toHaveBeenCalledWith('reset', expect.any(Function));
     expect(mockBot.command).toHaveBeenCalledWith('help', expect.any(Function));
     expect(mockBot.command).toHaveBeenCalledWith('myid', expect.any(Function));
-    expect(mockBot.command).toHaveBeenCalledWith('send', expect.any(Function));
     expect(mockBot.command).toHaveBeenCalledWith('who', expect.any(Function));
   });
 
@@ -57,25 +54,14 @@ describe('Bot Commands', () => {
     });
   });
 
-  describe('/chat command', () => {
-    test('should send chat ready message', async () => {
-      setupCommands(mockBot);
-      const chatHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'chat')[1];
-      
-      await chatHandler(mockCtx);
-
-      expect(mockCtx.reply).toHaveBeenCalledWith('Hi! I\'m ready to chat. What would you like to talk about?');
-    });
-  });
-
-  describe('/new_chat command', () => {
+  describe('/reset command', () => {
     test('should clear chat history', async () => {
       mockClearChatHistory.mockResolvedValue();
       
       setupCommands(mockBot);
-      const newChatHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'new_chat')[1];
+      const resetHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'reset')[1];
       
-      await newChatHandler(mockCtx);
+      await resetHandler(mockCtx);
 
       expect(mockClearChatHistory).toHaveBeenCalledWith('123456');
       expect(mockCtx.session.chatHistory).toEqual([]);
@@ -85,9 +71,9 @@ describe('Bot Commands', () => {
       const ctxNoFrom = { ...mockCtx, from: undefined };
       
       setupCommands(mockBot);
-      const newChatHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'new_chat')[1];
+      const resetHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'reset')[1];
       
-      await newChatHandler(ctxNoFrom);
+      await resetHandler(ctxNoFrom);
 
       expect(mockClearChatHistory).not.toHaveBeenCalled();
     });
@@ -130,41 +116,22 @@ describe('Bot Commands', () => {
         { parse_mode: 'Markdown' }
       );
     });
-  });
 
-  describe('/send command', () => {
-    test('should call handleAdminSendMessage', async () => {
-      mockCtx.message = { text: '/send 123 Hello' };
-      mockHandleAdminSendMessage.mockResolvedValue();
+    test('should handle errors in myid command', async () => {
+      // Mock ctx.reply to succeed but make first call fail internally
+      const errorCtx = {
+        ...mockCtx,
+        reply: jest.fn().mockImplementationOnce(() => {
+          throw new Error('Reply failed');
+        }).mockResolvedValueOnce({})
+      };
       
       setupCommands(mockBot);
-      const sendHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'send')[1];
+      const myidHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'myid')[1];
       
-      await sendHandler(mockCtx);
+      await myidHandler(errorCtx);
 
-      expect(mockHandleAdminSendMessage).toHaveBeenCalledWith('123456', '/send 123 Hello');
-    });
-
-    test('should handle missing message', async () => {
-      const ctxNoMessage = { ...mockCtx, message: undefined };
-      
-      setupCommands(mockBot);
-      const sendHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'send')[1];
-      
-      await sendHandler(ctxNoMessage);
-
-      expect(mockCtx.reply).toHaveBeenCalledWith('❌ Error: No text message found.');
-    });
-
-    test('should handle missing user info', async () => {
-      const ctxNoFrom = { ...mockCtx, from: undefined };
-      
-      setupCommands(mockBot);
-      const sendHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'send')[1];
-      
-      await sendHandler(ctxNoFrom);
-
-      expect(mockCtx.reply).toHaveBeenCalledWith('❌ Error: Unable to identify user.');
+      expect(errorCtx.reply).toHaveBeenCalledWith('Error getting your ID. Please try again.');
     });
   });
 
@@ -175,7 +142,25 @@ describe('Bot Commands', () => {
       
       await whoHandler(mockCtx);
 
-      expect(mockCtx.reply).toHaveBeenCalledWith(expect.stringContaining('Security status'));
+      expect(mockCtx.reply).toHaveBeenCalledWith(expect.stringContaining('Статус процесса'));
+    });
+
+    test('should handle errors in who command', async () => {
+      // Mock process.uptime to throw error instead
+      const originalUptime = process.uptime;
+      process.uptime = jest.fn().mockImplementation(() => {
+        throw new Error('Uptime failed');
+      });
+      
+      setupCommands(mockBot);
+      const whoHandler = mockBot.command.mock.calls.find((call: any[]) => call[0] === 'who')[1];
+      
+      await whoHandler(mockCtx);
+
+      expect(mockCtx.reply).toHaveBeenCalledWith('❌ Error getting process status.');
+      
+      // Restore original function
+      process.uptime = originalUptime;
     });
   });
 }); 

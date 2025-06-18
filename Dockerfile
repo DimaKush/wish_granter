@@ -1,13 +1,3 @@
-FROM node:20-alpine as builder
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
 FROM node:20-alpine
 
 WORKDIR /app
@@ -15,7 +5,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --production
 
-COPY --from=builder /app/dist ./dist
+# Copy locally built dist
+COPY dist ./dist
 COPY .env .env
 
 # Create directories and set permissions

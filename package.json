@@ -39,5 +39,10 @@
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "punycode": "^2.3.1",
+    "whatwg-url": "^14.0.0",
+    "tr46": "^5.0.0"
   }
 }

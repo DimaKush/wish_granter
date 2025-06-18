@@ -32,9 +32,8 @@ logger.info('Custom middlewares configured');
 const setupBotCommands = async () => {
   try {
     const userCommands = [
-      { command: 'start', description: 'Запустить бота' },
-      { command: 'chat', description: 'Начать диалог с AI' },
-      { command: 'new_chat', description: 'Начать новый диалог' },
+      { command: 'start', description: 'Запустить' },
+      { command: 'reset', description: 'Сбросить диалог' },
       { command: 'who', description: 'Проверить безопасность соединения' },
       { command: 'myid', description: 'Получить ваш Telegram ID' },
       { command: 'help', description: 'Показать справку' }
@@ -46,11 +45,9 @@ const setupBotCommands = async () => {
     // Setup admin commands if admin ID is configured
     if (process.env.ADMIN_TELEGRAM_ID) {
       const adminCommands = [
-        { command: 'start', description: 'Запустить бота' },
-        { command: 'chat', description: 'Начать диалог с AI' },
-        { command: 'new_chat', description: 'Начать новый диалог' },
+        { command: 'start', description: 'Запустить' },
+        { command: 'reset', description: 'Сбросить диалог' },
         { command: 'myid', description: 'Получить ваш Telegram ID' },
-        { command: 'send', description: 'Отправить сообщение пользователю' },
         { command: 'help', description: 'Показать справку' }
       ];
 

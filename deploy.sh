@@ -28,22 +28,29 @@ SSH_KEY="$SSH_KEY_PATH"
 REMOTE_DIR="/root/telegram_bot"
 USER="root"
 
+echo "🔨 Building locally..."
+npm run build
+
 echo "🚀 Deploying to $DROPLET_IP..."
 
 # Create remote directory if not exists
 ssh -i $SSH_KEY $USER@$DROPLET_IP "mkdir -p $REMOTE_DIR"
 
+# Stop container first
+ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose down"
+
 # Sync files
 rsync -avz --progress \
     -e "ssh -i $SSH_KEY" \
     --exclude 'node_modules' \
-    --exclude 'dist' \
     --exclude '.git' \
     --exclude 'logs' \
     --exclude 'data' \
+    --exclude 'coverage' \
+    --exclude 'tests' \
     ./ $USER@$DROPLET_IP:$REMOTE_DIR/
 
-# Deploy
-ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose down && docker compose up -d --build"
+# Build and start with fresh files
+ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose build --no-cache && docker compose up -d"
 
 echo "✅ Deployment complete!"

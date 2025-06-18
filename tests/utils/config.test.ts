@@ -30,6 +30,18 @@ describe('Config Utils', () => {
     test('should have transports configured', () => {
       expect(logger.transports).toHaveLength(3);
     });
+
+    test('should format log messages with timestamp', () => {
+      // Just verify logger method works - formatting is internal to winston
+      expect(() => logger.info('Test message')).not.toThrow();
+      expect(logger.level).toBe('info');
+    });
+
+    test('should format log messages with metadata', () => {
+      // Just verify logger method works with metadata
+      expect(() => logger.info('Test message', { userId: '123', action: 'test' })).not.toThrow();
+      expect(logger.level).toBe('info');
+    });
   });
 
   describe('siweConfig', () => {

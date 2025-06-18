@@ -1,11 +1,13 @@
 import { setupHandlers } from '../../src/bot/handlers';
 import { sendMessageToAnthropic } from '../../src/utils/chat';
+import { Context } from '../../src/types';
 
 // Mock dependencies
 jest.mock('../../src/utils/chat');
 jest.mock('../../src/utils/config', () => ({
   logger: {
     info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn()
   }
 }));

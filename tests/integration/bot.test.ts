@@ -65,11 +65,9 @@ describe('Bot Integration Tests', () => {
 
     // Check that commands were registered
     expect(commandSpy).toHaveBeenCalledWith('start', expect.any(Function));
-    expect(commandSpy).toHaveBeenCalledWith('chat', expect.any(Function));
-    expect(commandSpy).toHaveBeenCalledWith('new_chat', expect.any(Function));
+    expect(commandSpy).toHaveBeenCalledWith('reset', expect.any(Function));
     expect(commandSpy).toHaveBeenCalledWith('help', expect.any(Function));
     expect(commandSpy).toHaveBeenCalledWith('myid', expect.any(Function));
-    expect(commandSpy).toHaveBeenCalledWith('send', expect.any(Function));
     expect(commandSpy).toHaveBeenCalledWith('who', expect.any(Function));
 
     // Check that text handler was registered
@@ -94,7 +92,7 @@ describe('Bot Integration Tests', () => {
     setupCommands(bot);
 
     // Verify commands were registered
-    expect(commandSpy).toHaveBeenCalledTimes(7); // 7 commands total
+    expect(commandSpy).toHaveBeenCalledTimes(5); // 5 commands total
   });
 
   test('should handle handlers setup without errors', async () => {

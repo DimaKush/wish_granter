@@ -2,7 +2,6 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from './config';
-import { getSingleAdmin } from '../db/repository';
 import { bot } from '../index';
 import { callAnthropicAPI, AnthropicMessage } from '../services/anthropic';
 
@@ -272,57 +271,4 @@ You: *send admin notification first, then respond to user*
     }
     return "Sorry, I encountered an error processing your request. Please try again later.";
   }
-}
-
-export async function handleAdminSendMessage(adminId: string, text: string): Promise<void> {
-  try {
-    // Check if user is admin
-    const admins = await getSingleAdmin();
-    if (!admins.some(admin => admin.telegram_id === adminId)) {
-      await bot.telegram.sendMessage(adminId, "❌ You don't have permission to use this command.");
-      return;
-    }
-
-    // Parse command: /send userId message
-    const match = text.match(/^\/send\s+(\d+)\s+(.+)$/s);
-    if (!match) {
-      await bot.telegram.sendMessage(adminId, "❌ Invalid format. Use: /send userId message");
-      return;
-    }
-
-    const [, targetUserId, message] = match;
-
-    // Send message to target user
-    await bot.telegram.sendMessage(targetUserId, `📩 Message from admin:\n\n${message}`);
-    
-    // Confirm to admin
-    await bot.telegram.sendMessage(adminId, `✅ Message sent to user ${targetUserId}`);
-    
-    logger.info(`Admin ${adminId} sent message to user ${targetUserId}`);
-  } catch (error) {
-    logger.error('Error handling admin send message:', error);
-    await bot.telegram.sendMessage(adminId, "❌ Failed to send message. Please try again later.");
-  }
-}
-
-// Add reboot notification function
-async function notifyUsersAboutReboot() {
-  try {
-    const files = await fs.promises.readdir(CHAT_HISTORY_DIR);
-    for (const file of files) {
-      if (file.endsWith('.json')) {
-        const userId = file.replace('.json', '');
-        try {
-          await bot.telegram.sendMessage(userId, '🔄 Memory Reboot: Предыдущий контекст разговора сброшен для обеспечения безопасности.');
-        } catch (error) {
-          logger.warn(`Failed to send reboot notification to user ${userId}:`, error);
-        }
-      }
-    }
-  } catch (error) {
-    logger.error('Failed to notify users about reboot:', error);
-  }
-}
-
-// Call notification on startup
-notifyUsersAboutReboot(); 
+} 

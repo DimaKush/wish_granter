@@ -120,6 +120,19 @@ describe('Bot Middlewares', () => {
       expect(logger.info).toHaveBeenCalledWith('Message from user 123456 (@testuser): other');
       expect(mockNext).toHaveBeenCalled();
     });
+
+    test('should handle unknown message type when no message', async () => {
+      const { logger } = require('../../src/utils/config');
+      mockCtx.message = undefined;
+      
+      setupMiddlewares(mockBot);
+      const loggingMiddleware = mockBot.use.mock.calls[1][0];
+      
+      await loggingMiddleware(mockCtx, mockNext);
+
+      expect(logger.info).toHaveBeenCalledWith('Message from user 123456 (@testuser): unknown');
+      expect(mockNext).toHaveBeenCalled();
+    });
   });
 
   describe('Throttle Middleware', () => {
