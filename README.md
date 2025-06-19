@@ -22,12 +22,10 @@ An AI-powered Telegram bot that helps users discover and formulate their true wi
 ## Commands
 
 - `/start` - Welcome message and bot introduction
-- `/chat` - Start chatting with the AI
-- `/new_chat` - Start a fresh conversation (clears history)
+- `/reset` - Start a fresh conversation (clears history)
 - `/help` - Show help information
 - `/who` - Check connection status
 - `/myid` - Get your Telegram ID
-- `/send` - (Admin only) Send message to user
 
 You can also just send any text message to start chatting directly!
 
@@ -93,13 +91,66 @@ src/
 ### Session Management
 - In-memory session storage
 - Temporary chat history during bot runtime
-- Easy session reset with `/new_chat`
+- Easy session reset with `/reset`
 
 ### Basic Security
 - Telegram's MTProto protocol for message transport
 - Session-based message history
 - Connection status monitoring via `/who`
 - Technical event logging
+
+## Testing
+
+Проект покрыт комплексными тестами с использованием Jest:
+
+### Структура тестов
+```
+tests/
+├── setup.ts              # Глобальная конфигурация тестов
+├── bot/
+│   ├── commands.test.ts   # Тесты команд бота
+│   ├── handlers.test.ts   # Тесты обработчиков сообщений
+│   └── middlewares.test.ts # Тесты middleware (лимиты, сессии)
+├── utils/
+│   ├── chat.test.ts       # Тесты AI интеграции и шифрования
+│   └── config.test.ts     # Тесты конфигурации
+├── services/
+│   └── anthropic.test.ts  # Тесты Anthropic API
+├── db/
+│   └── repository.test.ts # Тесты базы данных
+└── integration/
+    └── bot.test.ts        # Интеграционные тесты
+
+```
+
+### Команды тестирования
+```bash
+# Запуск всех тестов
+npm run test
+
+# Запуск с отслеживанием изменений
+npm run test:watch
+
+# Генерация отчета по покрытию
+npm run test:coverage
+
+# CI режим (без watch)
+npm run test:ci
+```
+
+### Покрытие
+- **Команды бота** - полное покрытие всех команд `/start`, `/reset`, `/help`, etc.
+- **Обработчики сообщений** - тестирование AI интеграции и обработки ошибок
+- **Middleware** - rate limiting, session management, logging
+- **Шифрование** - AES-256-CBC для истории сообщений
+- **API интеграция** - Anthropic Claude взаимодействие
+- **База данных** - управление админами
+
+### Конфигурация Jest
+- TypeScript support через `ts-jest`
+- Автоматические моки для внешних API
+- Покрытие кода с HTML отчетами в `coverage/`
+- Timeout 10 секунд для сетевых операций
 
 ## License
 
