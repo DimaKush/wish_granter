@@ -55,8 +55,6 @@ How it works:
     if (ctx.session) {
       ctx.session.chatHistory = [];
     }
-
-    await ctx.reply('🔄 Диалог сброшен. Можете начать новую беседу! / Chat reset. You can start a new conversation!');
   });
 
   // Help command
