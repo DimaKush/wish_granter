@@ -27,30 +27,38 @@ fi
 SSH_KEY="$SSH_KEY_PATH"
 REMOTE_DIR="/root/telegram_bot"
 USER="root"
+IMAGE_NAME="telegram_bot:latest"
 
-echo "🔨 Building locally..."
-npm run build
+echo "🔨 Building Docker image locally..."
+docker build -t $IMAGE_NAME .
+
+echo "📦 Saving image to tar..."
+docker save $IMAGE_NAME > telegram_bot.tar
 
 echo "🚀 Deploying to $DROPLET_IP..."
 
 # Create remote directory if not exists
 ssh -i $SSH_KEY $USER@$DROPLET_IP "mkdir -p $REMOTE_DIR"
 
-# Stop container first
+# Stop containers
 ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose down"
 
-# Sync files
-rsync -avz --progress \
-    -e "ssh -i $SSH_KEY" \
-    --exclude 'node_modules' \
-    --exclude '.git' \
-    --exclude 'logs' \
-    --exclude 'data' \
-    --exclude 'coverage' \
-    --exclude 'tests' \
-    ./ $USER@$DROPLET_IP:$REMOTE_DIR/
+# Send image
+echo "📤 Uploading image..."
+scp -i $SSH_KEY telegram_bot.tar $USER@$DROPLET_IP:$REMOTE_DIR/
 
-# Build and start with fresh files
-ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker compose build --no-cache && docker compose up -d"
+# Send compose file and env
+echo "📄 Uploading configs..."
+scp -i $SSH_KEY docker-compose.yml .env $USER@$DROPLET_IP:$REMOTE_DIR/
+
+# Load and start
+echo "🚀 Loading image and starting..."
+ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && docker load < telegram_bot.tar && docker compose up -d"
+
+echo "📋 Status check..."
+ssh -i $SSH_KEY $USER@$DROPLET_IP "cd $REMOTE_DIR && sleep 3 && docker ps && docker compose logs bot"
+
+# Cleanup
+rm telegram_bot.tar
 
 echo "✅ Deployment complete!"

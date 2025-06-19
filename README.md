@@ -84,8 +84,6 @@ src/
 ### AI Chat
 - Powered by Anthropic Claude
 - Maintains conversation history within session
-- Typing indicators for better UX
-- Error handling for API failures
 
 ### Rate Limiting
 - 10 messages per minute per user

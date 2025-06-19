@@ -8,4 +8,18 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
-    user: "node" 
+    user: "node"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge 
